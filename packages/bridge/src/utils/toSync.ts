@@ -1,4 +1,4 @@
-import * as Automerge from 'automerge'
+import * as Automerge from '@automerge/automerge'
 
 const toSync = (node: any) => {
   if (!node) {

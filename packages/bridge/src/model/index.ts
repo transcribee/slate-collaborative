@@ -1,4 +1,4 @@
-import Automerge from 'automerge'
+import Automerge from '@automerge/automerge'
 import { Node, Range } from 'slate'
 
 export type SyncValue = Automerge.List<Node>

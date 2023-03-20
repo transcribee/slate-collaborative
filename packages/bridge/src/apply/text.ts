@@ -11,7 +11,7 @@ export const insertText = (
 
   const offset = Math.min(node.text.length, op.offset)
 
-  node.text.insertAt(offset, ...op.text.split(''))
+  node.text.insertAt(offset, ...op.text)
 
   return doc
 }
