@@ -1,13 +1,13 @@
 import { RemoveNodeOperation } from 'slate'
 
 import { SyncValue } from '../../model'
-import { getParent, getChildren } from '../../path'
+import { getChildren, getParentFromDoc } from '../../path'
 
 export const removeNode = (
   doc: SyncValue,
   op: RemoveNodeOperation
 ): SyncValue => {
-  const [parent, index] = getParent(doc, op.path)
+  const [parent, index] = getParentFromDoc(doc, op.path)
 
   if (parent.text) {
     throw new TypeError("Can't remove node from text node")

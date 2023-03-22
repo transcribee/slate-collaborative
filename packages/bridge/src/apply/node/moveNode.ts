@@ -2,11 +2,11 @@ import { MoveNodeOperation } from 'slate'
 
 import { cloneNode } from '../../utils'
 import { SyncValue } from '../../model'
-import { getParent, getChildren } from '../../path'
+import { getChildren, getParentFromDoc } from '../../path'
 
 const moveNode = (doc: SyncValue, op: MoveNodeOperation): SyncValue => {
-  const [from, fromIndex] = getParent(doc, op.path)
-  const [to, toIndex] = getParent(doc, op.newPath)
+  const [from, fromIndex] = getParentFromDoc(doc, op.path)
+  const [to, toIndex] = getParentFromDoc(doc, op.newPath)
 
   if (from.text || to.text) {
     throw new TypeError("Can't move node as child of a text node")

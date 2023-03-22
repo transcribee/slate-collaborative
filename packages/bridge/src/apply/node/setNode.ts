@@ -1,10 +1,10 @@
 import { SetNodeOperation } from 'slate'
 
 import { SyncValue } from '../../model'
-import { getTarget } from '../../path'
+import { getTargetFromDoc } from '../../path'
 
 const setNode = (doc: SyncValue, op: SetNodeOperation): SyncValue => {
-  const node = getTarget(doc, op.path)
+  const node = getTargetFromDoc(doc, op.path)
 
   const { newProperties } = op
 

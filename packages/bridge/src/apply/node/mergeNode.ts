@@ -1,11 +1,11 @@
 import { MergeNodeOperation, Node } from 'slate'
 
 import { SyncValue } from '../../model'
-import { getParent, getChildren } from '../../path'
+import { getChildren, getParentFromDoc } from '../../path'
 import { toJS, cloneNode } from '../../utils'
 
 const mergeNode = (doc: SyncValue, op: MergeNodeOperation): SyncValue => {
-  const [parent, index]: [any, number] = getParent(doc, op.path)
+  const [parent, index]: [any, number] = getParentFromDoc(doc, op.path)
 
   const prev = parent[index - 1] || parent.children[index - 1]
   const next = parent[index] || parent.children[index]

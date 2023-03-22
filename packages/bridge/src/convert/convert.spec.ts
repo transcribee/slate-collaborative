@@ -1,20 +1,25 @@
-import * as Automerge from 'automerge'
+import * as Automerge from '@automerge/automerge'
+
 import { toSlateOp } from './index'
-import { createDoc, cloneDoc, createNode } from '../utils'
+import { createDoc, createNode, toSync } from '../utils'
 
 describe('convert operations to slatejs model', () => {
   it('convert insert operations', () => {
     const doc1 = createDoc()
-    const doc2 = cloneDoc(doc1)
+    const doc2 = Automerge.clone(doc1)
 
-    const change = Automerge.change(doc1, d => {
-      d.children.push(createNode('paragraph', 'hello!'))
-      d.children[1].children[0].text = 'hello!'
+    const newDoc = Automerge.change(doc1, d => {
+      d.children.push(toSync(createNode('paragraph', 'Hello World!')))
     })
 
-    const operations = Automerge.diff(doc2, change)
+    let slateOps: any[] = []
 
-    const slateOps = toSlateOp(operations, change)
+    const operations = Automerge.getChanges(doc2, newDoc)
+    Automerge.applyChanges(doc2, operations, {
+      patchCallback: patches => {
+        slateOps.push(...toSlateOp(patches))
+      }
+    })
 
     const expectedOps = [
       {
@@ -25,7 +30,36 @@ describe('convert operations to slatejs model', () => {
       {
         type: 'insert_node',
         path: [1, 0],
-        node: { text: 'hello!' }
+        node: { text: 'Hello World!' }
+      }
+    ]
+
+    expect(slateOps).toStrictEqual(expectedOps)
+  })
+
+  it('convert text operations', () => {
+    const doc1 = createDoc([createNode('paragraph', 'Hello')])
+    const doc2 = Automerge.clone(doc1)
+
+    const change = Automerge.change(doc1, d => {
+      d.children[0].children[0].text.insertAt(5, ' World!')
+    })
+
+    let slateOps: any[] = []
+
+    const operations = Automerge.getChanges(doc2, change)
+    Automerge.applyChanges(doc2, operations, {
+      patchCallback: patches => {
+        slateOps.push(...toSlateOp(patches))
+      }
+    })
+
+    const expectedOps = [
+      {
+        type: 'insert_text',
+        path: [0, 0],
+        offset: 5,
+        text: ' World!'
       }
     ]
 
@@ -39,22 +73,27 @@ describe('convert operations to slatejs model', () => {
       d.children[1].children[0].text = 'hello!'
     })
 
-    const doc2 = cloneDoc(doc1)
+    const doc2 = Automerge.clone(doc1)
 
     const change = Automerge.change(doc1, d => {
       delete d.children[1]
       delete d.children[0].children[0]
     })
 
-    const operations = Automerge.diff(doc2, change)
+    let slateOps: any[] = []
 
-    const slateOps = toSlateOp(operations, change)
+    const operations = Automerge.getChanges(doc2, change)
+    Automerge.applyChanges(doc2, operations, {
+      patchCallback: patches => {
+        slateOps.push(...toSlateOp(patches))
+      }
+    })
 
     const expectedOps = [
       {
         type: 'remove_node',
         path: [1],
-        node: createNode('paragraph', 'hello twice!')
+        node: { children: [] }
       },
       {
         type: 'remove_node',

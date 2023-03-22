@@ -1,13 +1,13 @@
 import { InsertTextOperation, RemoveTextOperation } from 'slate'
 
-import { getTarget } from '../path'
+import { getTarget, getTargetFromDoc } from '../path'
 import { SyncValue } from '../model'
 
 export const insertText = (
   doc: SyncValue,
   op: InsertTextOperation
 ): SyncValue => {
-  const node = getTarget(doc, op.path)
+  const node = getTargetFromDoc(doc, op.path)
 
   const offset = Math.min(node.text.length, op.offset)
 
@@ -20,7 +20,7 @@ export const removeText = (
   doc: SyncValue,
   op: RemoveTextOperation
 ): SyncValue => {
-  const node = getTarget(doc, op.path)
+  const node = getTargetFromDoc(doc, op.path)
 
   const offset = Math.min(node.text.length, op.offset)
 

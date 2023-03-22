@@ -1,10 +1,11 @@
-import * as Automerge from 'automerge'
+import * as Automerge from '@automerge/automerge'
 
 import { toSlatePath, toJS } from '../utils'
 
 import { SyncDoc } from '../model'
+import { InsertPatch } from '@automerge/automerge'
 
-const insertTextOp = ({ index, path, value }: Automerge.Diff) => () => ({
+const insertTextOp = ({ path, values }: InsertPatch) => () => ({
   type: 'insert_text',
   path: toSlatePath(path),
   offset: index,
@@ -13,7 +14,7 @@ const insertTextOp = ({ index, path, value }: Automerge.Diff) => () => ({
 })
 
 const insertNodeOp = (
-  { value, obj, index, path }: Automerge.Diff,
+  { value, obj, index, path, ops: automergeOps }: Automerge.DecodedChange,
   doc: any
 ) => (map: any) => {
   const ops: any = []
@@ -48,9 +49,9 @@ const insertByType = {
   list: insertNodeOp
 }
 
-const opInsert = (op: Automerge.Diff, [map, ops]: any, doc: SyncDoc) => {
+const opInsert = (patch: Automerge.InsertPatch, [map, ops]: any, doc: SyncDoc) => {
   try {
-    const { link, obj, path, index, type, value } = op
+    const { path, index, type, value } = patch
 
     if (link && map.hasOwnProperty(obj)) {
       map[obj].splice(index, 0, map[value] || value)

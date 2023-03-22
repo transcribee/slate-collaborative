@@ -1,10 +1,10 @@
-import * as Automerge from 'automerge'
+import * as Automerge from '@automerge/automerge'
 
-const createByType = (type: Automerge.CollectionType) =>
+const createByType = (type: string | undefined) =>
   type === 'map' ? {} : type === 'list' ? [] : ''
 
-const opCreate = ({ obj, type }: Automerge.Diff, [map, ops]: any) => {
-  map[obj] = createByType(type)
+const opCreate = ({ obj, datatype }: Automerge.DecodedChange['ops'][number], [map, ops]: any) => {
+  map[obj] = createByType(datatype)
 
   return [map, ops]
 }

@@ -1,19 +1,20 @@
-import * as Automerge from 'automerge'
+import * as Automerge from '@automerge/automerge'
+import { getTarget } from '../path'
 
 import { toSlatePath, toJS } from '../utils'
 
 const setDataOp = (
-  { key = '', obj, path, value }: Automerge.Diff,
+  { key = '', obj, pred, value }: Automerge.DecodedChange['ops'][number],
   doc: any
 ) => (map: any) => {
   return {
     type: 'set_node',
-    path: toSlatePath(path),
+    path: toSlatePath(pred),
     properties: {
-      [key]: toJS(Automerge.getObjectById(doc, obj)?.[key])
+      [key]: getTarget(doc, toSlatePath(pred))?.[key]
     },
     newProperties: {
-      [key]: map?.[value] || value
+      [key]: map?.[value as string] || value
     }
   }
 }

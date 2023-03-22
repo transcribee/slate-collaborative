@@ -24,5 +24,3 @@ export const createValue = (children?: any): { children: Node[] } => ({
 
 export const createDoc = (children?: any) =>
   Automerge.from(toSync(createValue(children)))
-
-export const cloneDoc = (doc: any) => Automerge.change(doc, '', d => d)
