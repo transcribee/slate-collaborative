@@ -42,7 +42,7 @@ const byAction: AAAA = {
   put: (patch: PutPatch, tmpDoc: unknown) => {
     const key = patch.path[patch.path.length - 1]
 
-    console.log('put', { patch, key })
+    // console.log('put', { patch, key })
 
     // update tmpDoc
     const element = getChild(tmpDoc, parentPath(patch.path))
@@ -69,7 +69,7 @@ const byAction: AAAA = {
     ]
   },
   del: (patch: DelPatch, tmpDoc: unknown) => {
-    console.log('del', patch)
+    // console.log('del', patch)
 
     return [
       {
@@ -80,15 +80,15 @@ const byAction: AAAA = {
     ]
   },
   splice: (patch: SpliceTextPatch, tmpDoc: unknown) => {
-    console.log('splice', patch)
+    // console.log('splice', patch)
     throw new Error('not implemented')
   },
   inc: (patch: IncPatch, tmpDoc: unknown) => {
-    console.log('inc', patch)
+    // console.log('inc', patch)
     throw new Error('not implemented')
   },
   insert: (patch: InsertPatch, tmpDoc: unknown, opsToClean: any[]) => {
-    console.log('insert', { patch })
+    // console.log('insert', { patch })
 
     const { path, values } = patch
 
@@ -202,12 +202,15 @@ function cleanupOperations(ops: any[]) {
 
 const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
   const tmpDoc = toJS(before || { children: [] })
+  console.log('tmpDoc before', tmpDoc)
   const opsToClean: any[] = []
 
   const operations = patches.flatMap(patch => {
     const action = byAction[patch.action] as BBBB
     return action(patch, tmpDoc, opsToClean)
   })
+
+  console.log('tmpDoc after', tmpDoc)
 
   cleanupOperations(operations);
 
