@@ -20,14 +20,14 @@ export const getTarget = (doc: Element, path: Path) => {
 }
 
 export const getTargetFromDoc = (doc: SyncValue | SyncDoc, path: Prop[]): any => {
-  return path.reduce((current, part) => {
-    if (!current[part]) {
+  return path.reduce((current: any, part) => {
+    if (!(isTree(current as any) || current[part])) {
       throw new TypeError(
         `path ${part} does not match tree ${JSON.stringify(current)}`
       )
     }
 
-    return current[part]
+    return current[part] || current?.children[part]
   }, doc)
 }
 

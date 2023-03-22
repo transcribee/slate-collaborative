@@ -42,7 +42,7 @@ const byAction: AAAA = {
   put: (patch: PutPatch, tmpDoc: unknown) => {
     const key = patch.path[patch.path.length - 1]
 
-    // console.log('put', { patch, key })
+    console.log('put', { patch, key })
 
     // update tmpDoc
     const element = getChild(tmpDoc, parentPath(patch.path))
@@ -52,7 +52,7 @@ const byAction: AAAA = {
 
     // update insert operation if it exists
     if (element._insertOp) {
-      (element._insertOp as InsertNodeOperation).node[key] = patch.value
+      ;(element._insertOp as InsertNodeOperation).node[key] = patch.value
       return []
     }
 
@@ -69,7 +69,7 @@ const byAction: AAAA = {
     ]
   },
   del: (patch: DelPatch, tmpDoc: unknown) => {
-    // console.log('del', patch)
+    console.log('del', patch)
 
     return [
       {
@@ -88,7 +88,7 @@ const byAction: AAAA = {
     throw new Error('not implemented')
   },
   insert: (patch: InsertPatch, tmpDoc: unknown, opsToClean: any[]) => {
-    // console.log('insert', { patch })
+    console.log('insert', { patch })
 
     const { path, values } = patch
 
@@ -105,21 +105,22 @@ const byAction: AAAA = {
       ]
     }
 
-    const insertOps = values.map((value, idx) => ({
-      type: 'insert_node',
-      path: [...(parentPath(toSlatePath(path))), (key as number) + idx],
-      node: {} as Node // do not add text or children property, since this is done by a separate patch
-    } as InsertNodeOperation))
+    const insertOps = values.map(
+      (value, idx) =>
+        ({
+          type: 'insert_node',
+          path: [...parentPath(toSlatePath(path)), (key as number) + idx],
+          node: {} as Node // do not add text or children property, since this is done by a separate patch
+        } as InsertNodeOperation)
+    )
 
-    insertOps.forEach((op, idx) => {
-      ;(getChild(tmpDoc, parentPath(patch.path)) as any[]).splice(
-        key as number + idx,
-        0,
-        { _insertOp: op }
-      )
-    })
+    ;(getChild(tmpDoc, parentPath(patch.path)) as any[]).splice(
+      key as number,
+      0,
+      ...insertOps.map((op) => ({ _insertOp: op }))
+    )
 
-    return insertOps;
+    return insertOps
   }
 }
 
@@ -127,11 +128,11 @@ type AAAA = {
   [Property in Patch['action']]: (
     patch: Patch & { action: Property },
     tmpDoc: unknown,
-    opsToClean: any[],
+    opsToClean: any[]
   ) => Operation[]
 }
 
-type BBBB = (patch: Patch, tmpDoc: unknown, opsToClean: any[],) => Operation[]
+type BBBB = (patch: Patch, tmpDoc: unknown, opsToClean: any[]) => Operation[]
 
 function pathsEqual(a: Path, b: Path) {
   return a.join(',') == b.join(',')
@@ -188,20 +189,18 @@ function optimizeOperations(ops: Operation[]) {
 function cleanupOperations(ops: any[]) {
   ops.forEach(op => {
     if (op._insertOp) {
-      op._insertOp.type = "_"
+      op._insertOp.type = '_'
       delete op._insertOp
     }
 
     if (op.node?.children) {
-      cleanupOperations(op.node.children);
+      cleanupOperations(op.node.children)
     }
-  });
+  })
 }
 
-
-
 const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
-  const tmpDoc = toJS(before || { children: [] })
+  const tmpDoc = toJS(before)
   console.log('tmpDoc before', tmpDoc)
   const opsToClean: any[] = []
 
@@ -211,10 +210,11 @@ const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
   })
 
   console.log('tmpDoc after', tmpDoc)
+  console.log('raw operations', operations)
 
-  cleanupOperations(operations);
+  cleanupOperations(operations)
 
-  return operations.filter(op => op.type as any != '_')
+  return operations.filter(op => (op.type as any) != '_')
 }
 
 export { toSlateOp }

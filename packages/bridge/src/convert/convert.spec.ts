@@ -4,13 +4,13 @@ import { toSlateOp } from './index'
 import { createDoc, createNode, toSync } from '../utils'
 
 describe('convert operations to slatejs model', () => {
-  fit('convert insert operations', () => {
+  it('convert insert operations', () => {
     const doc1 = createDoc()
     const doc2 = Automerge.clone(doc1)
 
     const newDoc = Automerge.change(doc1, d => {
       d.children.push(toSync(createNode('paragraph', 'Hello World!')))
-      d.children.push(toSync(createNode('paragraph', 'Hello World 2!')))
+      d.children.splice(0, 0, toSync(createNode('paragraph', 'Hello World 2!')))
     })
 
     let slateOps: any[] = []
@@ -22,18 +22,44 @@ describe('convert operations to slatejs model', () => {
       }
     })
 
-    console.log(JSON.stringify(slateOps, undefined, 2));
+    console.log(JSON.stringify(slateOps, undefined, 2))
 
     const expectedOps = [
       {
         type: 'insert_node',
         path: [1],
-        node: { type: 'paragraph', children: [] }
+        node: {
+          type: 'paragraph',
+          children: [
+            {
+              text: ''
+            }
+          ]
+        }
+      },
+      {
+        type: 'insert_text',
+        text: 'Hello World!',
+        path: [1, 0],
+        offset: 0
       },
       {
         type: 'insert_node',
-        path: [1, 0],
-        node: { text: 'Hello World!' }
+        path: [2],
+        node: {
+          type: 'paragraph',
+          children: [
+            {
+              text: ''
+            }
+          ]
+        }
+      },
+      {
+        type: 'insert_text',
+        text: 'Hello World 2!',
+        path: [2, 0],
+        offset: 0
       }
     ]
 
