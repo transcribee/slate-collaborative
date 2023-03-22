@@ -46,12 +46,12 @@ const byAction: AAAA = {
 
     // update tmpDoc
     const element = getChild(tmpDoc, parentPath(patch.path))
-    if (element) {
+    if (element !== undefined) {
       element[key] = patch.value
     }
 
     // update insert operation if it exists
-    if (element?._insertOp) {
+    if (element._insertOp) {
       (element._insertOp as InsertNodeOperation).node[key] = patch.value
       return []
     }
@@ -60,7 +60,7 @@ const byAction: AAAA = {
     return [
       {
         type: 'set_node',
-        path: toSlatePath(patch.path),
+        path: toSlatePath(parentPath(patch.path)),
         properties: {}, // used to track removed keys, should not apply for put patches
         newProperties: {
           [key]: patch.value
@@ -107,7 +107,7 @@ const byAction: AAAA = {
 
     const insertOps = values.map((value, idx) => ({
       type: 'insert_node',
-      path: [...parentPath(toSlatePath(path)), (key as number) + idx],
+      path: [...(parentPath(toSlatePath(path))), (key as number) + idx],
       node: {} as Node // do not add text or children property, since this is done by a separate patch
     } as InsertNodeOperation))
 
