@@ -45,6 +45,7 @@ const byAction: AAAA = {
     console.log('put', { patch, key })
 
     // update tmpDoc
+    console.log('tmpDoc before put', toJS(tmpDoc));
     const element = getChild(tmpDoc, parentPath(patch.path))
     if (element !== undefined) {
       element[key] = patch.value
@@ -55,6 +56,8 @@ const byAction: AAAA = {
       ;(element._insertOp as InsertNodeOperation).node[key] = patch.value
       return []
     }
+
+    console.log('tmpDoc after put', toJS(tmpDoc));
 
     // generate slate op
     return [
@@ -120,7 +123,7 @@ const byAction: AAAA = {
       ...insertOps.map((op) => ({ _insertOp: op }))
     )
 
-    console.log("insertOps", toJS(insertOps), "getChild", toJS(getChild(tmpDoc, parentPath(patch.path))))
+    console.log('tmpDoc after insert', toJS(tmpDoc));
 
     return insertOps
   }
@@ -134,58 +137,6 @@ type AAAA = {
 }
 
 type BBBB = (patch: Patch, tmpDoc: unknown) => Operation[]
-
-function pathsEqual(a: Path, b: Path) {
-  return a.join(',') == b.join(',')
-}
-
-function optimizeOperations(ops: Operation[]) {
-  if (ops.length == 0) return []
-
-  const optimizedOperations: Operation[] = []
-
-  ops.forEach((op, idx) => {
-    if (idx === 0) {
-      optimizedOperations.push(op)
-      return
-    }
-
-    const last = optimizedOperations[optimizedOperations.length - 1]
-
-    if (last.type === 'insert_node') {
-      if (op.type === 'set_node' && pathsEqual(op.path, last.path)) {
-        optimizedOperations[optimizedOperations.length - 1] = {
-          ...last,
-          node: {
-            ...last.node,
-            ...op.newProperties
-          }
-        }
-        return
-      }
-
-      if (
-        op.type === 'insert_text' &&
-        pathsEqual(op.path, last.path) &&
-        Text.isText(last.node) &&
-        last.node.text == ''
-      ) {
-        optimizedOperations[optimizedOperations.length - 1] = {
-          ...last,
-          node: {
-            ...last.node,
-            text: op.text
-          }
-        }
-        return
-      }
-    }
-
-    optimizedOperations.push(op)
-  })
-
-  return optimizedOperations
-}
 
 function cleanupOperations(ops: any[]) {
   ops.forEach(op => {
