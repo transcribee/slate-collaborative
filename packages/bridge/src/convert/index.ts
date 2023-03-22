@@ -1,10 +1,5 @@
 import * as Automerge from '@automerge/automerge'
 
-// import opInsert from './insert.xts'
-// import opRemove from './remove.xts'
-// import opSet from './set.xts'
-import opCreate from './create'
-
 import { toJS, toSlatePath } from '../utils'
 
 import {
@@ -42,10 +37,7 @@ const byAction: AAAA = {
   put: (patch: PutPatch, tmpDoc: unknown) => {
     const key = patch.path[patch.path.length - 1]
 
-    console.log('put', { patch, key })
-
     // update tmpDoc
-    console.log('tmpDoc before put', toJS(tmpDoc))
     const element = getChild(tmpDoc, parentPath(patch.path))
     if (element !== undefined) {
       element[key] =
@@ -60,8 +52,6 @@ const byAction: AAAA = {
       return []
     }
 
-    console.log('tmpDoc after put', toJS(tmpDoc))
-
     // generate slate op
     return [
       {
@@ -75,8 +65,6 @@ const byAction: AAAA = {
     ]
   },
   del: (patch: DelPatch, tmpDoc: unknown) => {
-    console.log('del', patch)
-
     return [
       {
         type: 'remove_node',
@@ -86,16 +74,12 @@ const byAction: AAAA = {
     ]
   },
   splice: (patch: SpliceTextPatch, tmpDoc: unknown) => {
-    // console.log('splice', patch)
     throw new Error('not implemented')
   },
   inc: (patch: IncPatch, tmpDoc: unknown) => {
-    // console.log('inc', patch)
     throw new Error('not implemented')
   },
   insert: (patch: InsertPatch, tmpDoc: unknown) => {
-    console.log('insert', { patch })
-
     const { path, values } = patch
 
     const key = path[path.length - 1]
@@ -125,8 +109,6 @@ const byAction: AAAA = {
       0,
       ...insertOps.map(op => ({ _insertOp: op }))
     )
-
-    console.log('tmpDoc after insert', toJS(tmpDoc))
 
     return insertOps
   }
@@ -160,11 +142,12 @@ const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
 
   const operations = patches.flatMap(patch => {
     const action = byAction[patch.action] as BBBB
-    return action(patch, tmpDoc)
+    const ops = action(patch, tmpDoc)
+    console.log('patch', { patch, ops: toJS(ops) });
+    return ops;
   })
 
   console.log('tmpDoc after', toJS(tmpDoc))
-  console.log('raw operations', toJS(operations))
 
   cleanupOperations(operations)
 
