@@ -4,22 +4,25 @@ import { toSlateOp } from './index'
 import { createDoc, createNode, toSync } from '../utils'
 
 describe('convert operations to slatejs model', () => {
-  it('convert insert operations', () => {
+  fit('convert insert operations', () => {
     const doc1 = createDoc()
     const doc2 = Automerge.clone(doc1)
 
     const newDoc = Automerge.change(doc1, d => {
       d.children.push(toSync(createNode('paragraph', 'Hello World!')))
+      d.children.push(toSync(createNode('paragraph', 'Hello World 2!')))
     })
 
     let slateOps: any[] = []
 
-    const operations = Automerge.getChanges(doc2, newDoc)
-    Automerge.applyChanges(doc2, operations, {
-      patchCallback: patches => {
-        slateOps.push(...toSlateOp(patches))
+    const changes = Automerge.getChanges(doc2, newDoc)
+    Automerge.applyChanges(doc2, changes, {
+      patchCallback: (patches, before) => {
+        slateOps.push(...toSlateOp(patches, before))
       }
     })
+
+    console.log(JSON.stringify(slateOps, undefined, 2));
 
     const expectedOps = [
       {
@@ -47,10 +50,10 @@ describe('convert operations to slatejs model', () => {
 
     let slateOps: any[] = []
 
-    const operations = Automerge.getChanges(doc2, change)
-    Automerge.applyChanges(doc2, operations, {
-      patchCallback: patches => {
-        slateOps.push(...toSlateOp(patches))
+    const changes = Automerge.getChanges(doc2, change)
+    Automerge.applyChanges(doc2, changes, {
+      patchCallback: (patches, before) => {
+        slateOps.push(...toSlateOp(patches, before))
       }
     })
 
@@ -82,10 +85,10 @@ describe('convert operations to slatejs model', () => {
 
     let slateOps: any[] = []
 
-    const operations = Automerge.getChanges(doc2, change)
-    Automerge.applyChanges(doc2, operations, {
-      patchCallback: patches => {
-        slateOps.push(...toSlateOp(patches))
+    const changes = Automerge.getChanges(doc2, change)
+    Automerge.applyChanges(doc2, changes, {
+      patchCallback: (patches, before) => {
+        slateOps.push(...toSlateOp(patches, before))
       }
     })
 
