@@ -138,16 +138,12 @@ function cleanupOperations(ops: any[]) {
 
 const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
   const tmpDoc = toJS(before)
-  console.log('tmpDoc before', toJS(tmpDoc))
 
   const operations = patches.flatMap(patch => {
     const action = byAction[patch.action] as BBBB
     const ops = action(patch, tmpDoc)
-    console.log('patch', { patch, ops: toJS(ops) });
     return ops;
   })
-
-  console.log('tmpDoc after', toJS(tmpDoc))
 
   cleanupOperations(operations)
 
