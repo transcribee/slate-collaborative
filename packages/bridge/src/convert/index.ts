@@ -201,7 +201,7 @@ function cleanupOperations(ops: any[]) {
 
 const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
   const tmpDoc = toJS(before)
-  console.log('tmpDoc before', tmpDoc)
+  console.log('tmpDoc before', toJS(tmpDoc))
   const opsToClean: any[] = []
 
   const operations = patches.flatMap(patch => {
@@ -209,8 +209,8 @@ const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
     return action(patch, tmpDoc, opsToClean)
   })
 
-  console.log('tmpDoc after', tmpDoc)
-  console.log('raw operations', operations)
+  console.log('tmpDoc after', toJS(tmpDoc))
+  console.log('raw operations', toJS(operations))
 
   cleanupOperations(operations)
 
