@@ -45,10 +45,13 @@ const byAction: AAAA = {
     console.log('put', { patch, key })
 
     // update tmpDoc
-    console.log('tmpDoc before put', toJS(tmpDoc));
+    console.log('tmpDoc before put', toJS(tmpDoc))
     const element = getChild(tmpDoc, parentPath(patch.path))
     if (element !== undefined) {
-      element[key] = patch.value
+      element[key] =
+        typeof element[key] === 'object' && typeof patch.value === 'object'
+          ? { ...element[key], ...patch.value }
+          : patch.value
     }
 
     // update insert operation if it exists
@@ -57,7 +60,7 @@ const byAction: AAAA = {
       return []
     }
 
-    console.log('tmpDoc after put', toJS(tmpDoc));
+    console.log('tmpDoc after put', toJS(tmpDoc))
 
     // generate slate op
     return [
@@ -120,10 +123,10 @@ const byAction: AAAA = {
     getChild(tmpDoc, parentPath(patch.path)).splice(
       key as number,
       0,
-      ...insertOps.map((op) => ({ _insertOp: op }))
+      ...insertOps.map(op => ({ _insertOp: op }))
     )
 
-    console.log('tmpDoc after insert', toJS(tmpDoc));
+    console.log('tmpDoc after insert', toJS(tmpDoc))
 
     return insertOps
   }
@@ -132,7 +135,7 @@ const byAction: AAAA = {
 type AAAA = {
   [Property in Patch['action']]: (
     patch: Patch & { action: Property },
-    tmpDoc: unknown,
+    tmpDoc: unknown
   ) => Operation[]
 }
 
