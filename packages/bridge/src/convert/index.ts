@@ -114,7 +114,7 @@ const byAction: AAAA = {
         } as InsertNodeOperation)
     )
 
-    ;(getChild(tmpDoc, parentPath(patch.path)) as any[]).splice(
+    getChild(tmpDoc, parentPath(patch.path)).splice(
       key as number,
       0,
       ...insertOps.map((op) => ({ _insertOp: op }))
