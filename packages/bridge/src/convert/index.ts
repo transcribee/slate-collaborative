@@ -87,7 +87,7 @@ const byAction: AAAA = {
     // console.log('inc', patch)
     throw new Error('not implemented')
   },
-  insert: (patch: InsertPatch, tmpDoc: unknown, opsToClean: any[]) => {
+  insert: (patch: InsertPatch, tmpDoc: unknown) => {
     console.log('insert', { patch })
 
     const { path, values } = patch
@@ -120,6 +120,8 @@ const byAction: AAAA = {
       ...insertOps.map((op) => ({ _insertOp: op }))
     )
 
+    console.log("insertOps", toJS(insertOps), "getChild", toJS(getChild(tmpDoc, parentPath(patch.path))))
+
     return insertOps
   }
 }
@@ -128,11 +130,10 @@ type AAAA = {
   [Property in Patch['action']]: (
     patch: Patch & { action: Property },
     tmpDoc: unknown,
-    opsToClean: any[]
   ) => Operation[]
 }
 
-type BBBB = (patch: Patch, tmpDoc: unknown, opsToClean: any[]) => Operation[]
+type BBBB = (patch: Patch, tmpDoc: unknown) => Operation[]
 
 function pathsEqual(a: Path, b: Path) {
   return a.join(',') == b.join(',')
@@ -202,11 +203,10 @@ function cleanupOperations(ops: any[]) {
 const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
   const tmpDoc = toJS(before)
   console.log('tmpDoc before', toJS(tmpDoc))
-  const opsToClean: any[] = []
 
   const operations = patches.flatMap(patch => {
     const action = byAction[patch.action] as BBBB
-    return action(patch, tmpDoc, opsToClean)
+    return action(patch, tmpDoc)
   })
 
   console.log('tmpDoc after', toJS(tmpDoc))
