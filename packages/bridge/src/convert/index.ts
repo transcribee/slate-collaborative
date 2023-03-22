@@ -201,7 +201,7 @@ function cleanupOperations(ops: any[]) {
 
 
 const toSlateOp = (patches: Patch[], before: Automerge.Doc<unknown>) => {
-  const tmpDoc = toJS(before)
+  const tmpDoc = toJS(before || { children: [] })
   const opsToClean: any[] = []
 
   const operations = patches.flatMap(patch => {
