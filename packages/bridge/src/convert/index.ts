@@ -46,10 +46,12 @@ const byAction: AAAA = {
 
     // update tmpDoc
     const element = getChild(tmpDoc, parentPath(patch.path))
-    element[key] = patch.value
+    if (element) {
+      element[key] = patch.value
+    }
 
     // update insert operation if it exists
-    if (element._insertOp) {
+    if (element?._insertOp) {
       (element._insertOp as InsertNodeOperation).node[key] = patch.value
       return []
     }
